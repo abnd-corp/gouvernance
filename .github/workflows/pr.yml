@@ -1,0 +1,14 @@
+name: PR
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  controle:
+    name: Contrôle des PR
+    uses: ./.github/workflows/controle-pr.yml
