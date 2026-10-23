@@ -88,6 +88,16 @@ jobs:
 
 Les images sont **privées**. Le premier envoi crée le paquet ; il faut vérifier une fois, dans les réglages du paquet, qu'il est bien privé et lié au dépôt. Un serveur qui tire l'image a besoin d'un jeton de lecture (`read:packages`) : à prévoir au moment du déploiement. Le paramètre `publier: false` construit sans publier, pour un essai.
 
+### Ne pas accumuler d'images
+
+Une image par mise en production, c'est aussi une image de plus à chaque promotion : trois promotions par jour sur deux images, c'est six versions par jour pour un projet. Le plan gratuit limite le stockage des paquets privés (environ 500 Mo, à vérifier dans les réglages de facturation de l'organisation). Trois leviers :
+
+1. **Promouvoir moins souvent.** Une image n'est construite qu'à la promotion sur `main` : regrouper plusieurs fonctionnalités dans une promotion réduit les images sans rien perdre.
+2. **Nettoyer automatiquement.** `nettoyer-images.yml` garde les N plus récentes (5 par défaut) et supprime le reste après 4 semaines. Il tourne chaque semaine depuis le projet. Premier lancement en essai (`essai: true`), qui liste sans supprimer.
+3. **Des couches partagées.** Un Dockerfile qui sépare installation des dépendances et code fait que deux images successives ne stockent presque que la différence.
+
+Limite connue : avec le jeton du workflow, on ne peut pas exclure les tags de version du nettoyage ; un jeton dédié le permettra plus tard.
+
 ## Projets déjà en place
 
 | Projet | État |

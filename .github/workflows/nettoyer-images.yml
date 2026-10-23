@@ -1,0 +1,53 @@
+# Workflow partagé : garde peu d'images sur GHCR (R44).
+# Chaque mise en production (merge de staging dans main) crée une image ; sans nettoyage elles s'accumulent.
+# Règle : on garde les N plus récentes de chaque image, et on supprime ce qui a plus de `delai` en plus de cela.
+# L'outil protège les enfants des images multi-architectures (amd64 et arm64), il ne les casse pas.
+#
+# Limite : avec le jeton du workflow (GITHUB_TOKEN), on ne peut pas exclure les tags de version (X.Y.Z) du nettoyage.
+# Une release ancienne disparaît donc comme les autres. Pour la garder, il faudra un jeton dédié (à prévoir plus tard).
+#
+# Exemple d'appel (hebdomadaire) :
+#   jobs:
+#     nettoyer:
+#       permissions: { packages: write }
+#       uses: abnd-corp/gouvernance/.github/workflows/nettoyer-images.yml@<empreinte>
+#       with: { images: "abatelier-api abatelier-web" }
+name: Nettoyer les images
+
+on:
+  workflow_call:
+    inputs:
+      images:
+        description: "Noms des images, séparés par des espaces (ex. abatelier-api abatelier-web)"
+        type: string
+        required: true
+      garder:
+        description: "Nombre d'images récentes toujours conservées, par image"
+        type: number
+        default: 5
+      delai:
+        description: "Âge minimal d'une image pour être supprimée (ex. 4w)"
+        type: string
+        default: "4w"
+      essai:
+        description: "true : liste ce qui serait supprimé, sans rien supprimer"
+        type: boolean
+        default: true
+
+permissions:
+  packages: write
+
+jobs:
+  nettoyer:
+    name: Nettoyer ${{ inputs.images }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: snok/container-retention-policy@d3bdcf5ce9b05f685154e4a16c39233b245e3d53 # v3.1.0
+        with:
+          account: ${{ github.repository_owner }}
+          token: ${{ github.token }}
+          image-names: ${{ inputs.images }}
+          tag-selection: both
+          keep-n-most-recent: ${{ inputs.garder }}
+          cut-off: ${{ inputs.delai }}
+          dry-run: ${{ inputs.essai }}
