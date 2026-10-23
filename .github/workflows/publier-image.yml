@@ -1,5 +1,6 @@
 # Workflow partagé : construit une image et la publie sur GHCR (R44).
-# À appeler sur un tag vX.Y.Z. Aucun tag « latest ». Les images restent privées.
+# À appeler sur un push sur main, c'est-à-dire au merge de staging dans main : une image par mise en production.
+# Tag : l'empreinte du commit, plus X.Y.Z et X.Y si le commit porte un tag vX.Y.Z. Aucun tag « latest ». Images privées.
 #
 # Exemple d'appel :
 #   jobs:
@@ -47,6 +48,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+
+      - name: Version du commit, s'il en porte une
+        id: version
+        run: |
+          v=$(git tag --points-at HEAD | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1 || true)
+          echo "v=${v#v}" >> "$GITHUB_OUTPUT"
 
       - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
       - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
@@ -66,9 +75,9 @@ jobs:
           images: ghcr.io/${{ github.repository_owner }}/${{ inputs.nom }}
           flavor: latest=false
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
             type=sha,format=long,prefix=
+            type=semver,pattern={{version}},value=${{ steps.version.outputs.v }},enable=${{ steps.version.outputs.v != '' }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.version.outputs.v }},enable=${{ steps.version.outputs.v != '' }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
 

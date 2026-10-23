@@ -67,13 +67,13 @@ Ce dépôt (`gouvernance`) ne suit pas ce chemin : il ne contient que de la docu
 
 ## Les images de conteneurs (R44)
 
-Le workflow partagé `publier-image.yml` construit une image pour amd64 et arm64 et la pousse sur GHCR (`ghcr.io/abnd-corp/<nom>`) avec les tags `X.Y.Z`, `X.Y` et l'empreinte du commit. Jamais `latest`. Un projet l'appelle depuis un workflow déclenché par un tag `vX.Y.Z` posé sur `main` :
+Le workflow partagé `publier-image.yml` construit une image pour amd64 et arm64 et la pousse sur GHCR (`ghcr.io/abnd-corp/<nom>`). Tag : l'empreinte du commit, plus `X.Y.Z` et `X.Y` quand le commit porte un tag `vX.Y.Z`. Jamais `latest`. Il ne tourne **que lorsqu'une promotion arrive sur `main`**, c'est-à-dire au merge `staging` → `main` : une image par mise en production, pas une par commit ni par tag. Un projet l'appelle ainsi :
 
 ```yaml
 name: Images
 on:
   push:
-    tags: ['v*']
+    branches: [main]
 permissions:
   contents: read
   packages: write
