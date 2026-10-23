@@ -38,6 +38,56 @@ Conséquence : la gouvernance **se copie** dans chaque projet au lieu de s'impos
 
 4. **Écarts.** Tout écart à la charte est noté dans le README du projet (R21) et, s'il est technique, dans un ADR (R25).
 
+## Le chemin de branches (R45)
+
+Le même pour tous les projets : `feature/** → dev → staging → main`. Un projet l'adopte en trois gestes.
+
+1. **Appeler le contrôle de source** : `.github/workflows/flux.yml`.
+
+   ```yaml
+   name: Flux de branches
+   on:
+     pull_request:
+       branches: [dev, staging, main]
+       types: [opened, edited, reopened, synchronize]
+   permissions:
+     contents: read
+   jobs:
+     source:
+       name: Branche source autorisée
+       uses: abnd-corp/gouvernance/.github/workflows/branche-source.yml@<empreinte>
+   ```
+
+   Le contrôle de PR (`gouvernance.yml`) ne vise plus `main` mais `dev` : `branches: [dev]`.
+
+2. **Créer `dev` et `staging` et poser les rulesets** : `scripts/appliquer-flux.sh <depot> [--noms] [contrôles de CI du projet…]`. Le script crée les branches depuis `main`, puis pose les rulesets : `dev` en squash, `staging` et `main` en merge commit, avec la CI obligatoire. Sur un dépôt privé il crée seulement les branches (pas de rulesets sur le plan gratuit).
+3. **Noter les écarts** dans le README ou un ADR (R21, R25).
+
+Ce dépôt (`gouvernance`) ne suit pas ce chemin : il ne contient que de la documentation et des workflows, `main` y reçoit des PR en squash avec une review (voir l'ADR 0001).
+
+## Les images de conteneurs (R44)
+
+Le workflow partagé `publier-image.yml` construit une image pour amd64 et arm64 et la pousse sur GHCR (`ghcr.io/abnd-corp/<nom>`) avec les tags `X.Y.Z`, `X.Y` et l'empreinte du commit. Jamais `latest`. Un projet l'appelle depuis un workflow déclenché par un tag `vX.Y.Z` posé sur `main` :
+
+```yaml
+name: Images
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+  packages: write
+jobs:
+  api:
+    uses: abnd-corp/gouvernance/.github/workflows/publier-image.yml@<empreinte>
+    with: { nom: mon-projet-api, contexte: ./api, cible: prod }
+  web:
+    uses: abnd-corp/gouvernance/.github/workflows/publier-image.yml@<empreinte>
+    with: { nom: mon-projet-web, contexte: ./web, cible: prod }
+```
+
+Les images sont **privées**. Le premier envoi crée le paquet ; il faut vérifier une fois, dans les réglages du paquet, qu'il est bien privé et lié au dépôt. Un serveur qui tire l'image a besoin d'un jeton de lecture (`read:packages`) : à prévoir au moment du déploiement. Le paramètre `publier: false` construit sans publier, pour un essai.
+
 ## Projets déjà en place
 
 | Projet | État |
