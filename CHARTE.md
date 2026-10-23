@@ -9,11 +9,12 @@ Elle est **évolutive** : on la valide telle quelle pour pouvoir avancer, puis o
 Tout le code d'Abnd vit sur GitHub, et rien n'arrive sur `main` sans passer par une PR relue.
 
 - **R1 · GitHub est notre forge, sans qu'on en dépende.** Code, tickets, kanban, CI et releases sont sur l'orga GitHub. Un miroir automatique copie tous les repos hors de GitHub, les issues sont exportées régulièrement dans `inventaire`, et la CI tient dans le `Makefile`. Le jour où on décide de s'héberger, rien n'est perdu.
-- **R2 · Jamais de push direct sur `main`.** Tout changement passe par une branche et une PR.
+- **R2 · Jamais de push direct sur `dev`, `staging` ni `main`.** Tout changement passe par une branche `feature/…` et une PR.
 - **R3 · Une PR = une issue.** La description contient « Closes #N ». Pas d'issue, pas de PR.
-- **R4 · On vérifie en local, puis la PR se merge avec une CI verte et une review approuvée.** Avant d'ouvrir une PR, `make check` (lint et tests) passe en local, pour nous comme pour les agents. Un hook de pré-push peut le lancer tout seul. Toutes les PR sont relues. Merge en squash, le message est le titre de la PR.
-- **R5 · Conventional Commits.** Les titres de PR commencent par `feat:`, `fix:`, `chore:`… C'est ce qui permet de calculer les versions et le changelog automatiquement.
+- **R4 · On vérifie en local, puis la PR se merge avec une CI verte et une review approuvée.** Avant d'ouvrir une PR, `make check` (lint et tests) passe en local, pour nous comme pour les agents. Un hook de pré-push peut le lancer tout seul. Toutes les PR sont relues. Merge en squash vers `dev` (le message est le titre de la PR), en merge commit pour les promotions (R45).
+- **R5 · Conventional Commits.** Les titres de PR vers `dev` commencent par `feat:`, `fix:`, `chore:`… C'est ce qui permet de calculer les versions et le changelog automatiquement.
 - **R6 · Le travail se suit dans un seul kanban d'orga, fait des issues elles-mêmes.** Colonnes Backlog → Todo → In progress → In review → Done. Une issue créée arrive seule dans Backlog, la PR qui la ferme la passe en Done : aucune double saisie. Une tâche qui n'y est pas n'existe pas.
+- **R45 · Tous les projets suivent le même chemin : `feature/** → dev → staging → main`.** Chaque marche se passe par une PR. `dev` n'accepte que `feature/**` (et `dependabot/**`) et se merge en squash ; `staging` n'accepte que `dev`, et `main` que `staging`, tous deux en merge commit (un squash créerait un commit absent de la branche source et des conflits à la promotion suivante). Une PR ne se merge que si la CI est verte et si le contrôle « Branche source autorisée » passe. Les branches autres que `feature/**` et `dependabot/**` ne se créent pas. La mise en place est décrite dans [docs/mise-en-oeuvre.md](docs/mise-en-oeuvre.md). Un projet qui ne peut pas le suivre l'écrit dans un ADR (R25).
 - **R7 · Les règles de l'orga sont du code.** Rulesets, labels, équipes et configs partagées vivent dans `org-config`. On les change par PR, le bot les applique à tous les repos, et chaque changement garde son historique. Fini les réglages cliqués repo par repo.
 
 ## Sécurité et accès
@@ -22,7 +23,7 @@ Un accès se donne nominativement, se trace et se retire le jour du départ.
 
 - **R8 · 2FA obligatoire** pour tous les membres de l'orga GitHub et sur chaque outil qui la propose.
 - **R9 · Aucun secret dans le code ni dans un message.** Les mots de passe partagés vivent dans le coffre d'équipe. Le secret scanning bloque un token commité par erreur.
-- **R10 · `main` n'accepte que des commits signés.** Tout y arrive par un squash merge fait depuis GitHub, donc c'est GitHub qui signe. Personne n'a de clé à configurer.
+- **R10 · `main` n'accepte que des commits signés.** Tout y arrive par un merge fait depuis GitHub, donc c'est GitHub qui signe. Personne n'a de clé à configurer.
 - **R11 · Les comptes appartiennent à l'orga, pas à une personne.** Registrar, hébergement, abonnements : adresse mail de l'orga, jamais un compte perso.
 - **R12 · Chaque départ déclenche la checklist de départ.** Retrait des accès, rotation des secrets connus, transfert de ce qui était à son nom. La fiche passe en `statut: parti`, on garde l'historique.
 - **R13 · Les données personnelles et clients restent privées.** Elles vivent uniquement dans le repo privé `inventaire`, accessible aux membres seuls.
@@ -55,11 +56,11 @@ Tous les projets partent du même standard, pour qu'on s'y retrouve, nous comme 
 
 Tous les projets livrent de la même façon : rien n'arrive en production à la main, et chaque mise en production peut être annulée. Les outils et l'hébergement de chaque projet se choisissent dans un ADR.
 
-- **R40 · Les mêmes noms d'environnements partout** : local, recette, production. Un projet peut en avoir moins, c'est décidé au cahier des charges (comme R20).
-- **R41 · Rien n'arrive en production à la main.** La recette se déploie toute seule depuis `main`. La production ne se déploie que depuis une release validée (R23), par la CI.
+- **R40 · Les mêmes noms d'environnements partout** : local, recette (branche `staging`), production (branche `main`). Un projet peut en avoir moins, c'est décidé au cahier des charges (comme R20).
+- **R41 · Rien n'arrive en production à la main.** La recette se déploie toute seule depuis `staging`. La production ne se déploie que depuis une release validée (R23) sur `main`, par la CI.
 - **R42 · Des secrets séparés par environnement.** Ceux de production ne vivent que dans le coffre et dans la CI, jamais sur une machine de dev (R18).
 - **R43 · Toute mise en production prévoit un retour arrière.** Sur un projet client, elle passe par la validation à trois (R35) et elle est tracée (R32).
-- **R44 · Les images de conteneurs vivent sur GHCR, publiées uniquement par la CI.** Chaque release produit une image taguée avec sa version. La production pointe vers une version précise, jamais vers `latest`. Personne ne publie d'image depuis sa machine, et chaque image se reconstruit depuis le Dockerfile du repo, donc on peut changer de registre sans rien perdre (R1).
+- **R44 · Les images de conteneurs vivent sur GHCR, privées, publiées uniquement par la CI.** Une image n'est construite que lorsqu'une promotion arrive sur `main` (le merge `staging` → `main`) : jamais sur `dev`, `staging` ni sur une PR. Elle est faite pour amd64 et arm64, taguée avec l'empreinte du commit et, quand le commit porte un tag `vX.Y.Z` (R23), avec sa version (`X.Y.Z`, `X.Y`). Jamais `latest`. Le workflow partagé est `publier-image.yml` (voir [docs/mise-en-oeuvre.md](docs/mise-en-oeuvre.md)). La production pointe vers une version précise, jamais vers `latest`. Personne ne publie d'image depuis sa machine, et chaque image se reconstruit depuis le Dockerfile du repo, donc on peut changer de registre sans rien perdre (R1).
 
 ## Membres, outils et clients
 
@@ -121,6 +122,8 @@ Le radar (On adopte, On essaie, On évalue, On évite) sera tenu dans `docs/stac
 | Rapports par mail | Depuis une adresse du domaine abnd. Avancement le lundi, santé le 1er du mois. | R11 |
 | Visibilité de l'IA dans les repos | `AGENTS.md` assumé dans chaque repo, aucune signature d'IA dans l'historique. | R16, R17 |
 | Formation avant le premier client | Obligatoire. | Rôles et périmètres |
+| Flux de branches | `feature/** → dev → staging → main` pour tous les projets, comme Abatelier. | R2, R4, R45 |
+| Images de conteneurs | Sur GHCR, privées. Le jeton de lecture pour les serveurs est prévu plus tard. | R44 |
 | Offre GitHub payante | Non. On reste sur le plan gratuit : pas de rulesets d'organisation, chaque dépôt public a le sien (voir [docs/mise-en-oeuvre.md](docs/mise-en-oeuvre.md)). | R7, R22 |
 
 ## Faire évoluer la charte
