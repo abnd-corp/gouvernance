@@ -129,5 +129,4 @@ La charte n'est pas figée. Pour changer une règle : une issue qui explique pou
 
 ## Validation
 
-- [x] Adoptée dans sa version v2, évolutive, le 22 octobre 2026, à la demande de Rudy (voir la PR « Mise en place »)
-- [ ] Approbation de Hugo (se fait par la review de la PR « Mise en place »)
+La charte est adoptée dans sa version v2 par Rudy et Hugo, le 23 octobre 2026. Elle reste évolutive : ce qui gêne se corrige par PR, et les points secondaires se traitent le moment venu.
