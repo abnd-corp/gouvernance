@@ -30,7 +30,7 @@ Conséquence : la gouvernance **se copie** dans chaque projet au lieu de s'impos
        uses: abnd-corp/gouvernance/.github/workflows/controle-pr.yml@main
    ```
 
-   La charte demande de figer un workflow externe sur une empreinte exacte (R24) : remplacer `main` par l'empreinte du commit de ce dépôt dès qu'une version est validée. Dépendabot / Renovate la met ensuite à jour.
+   La charte demande de figer un workflow externe sur une empreinte exacte (R24) : remplacer `main` par l'empreinte du commit de ce dépôt dès qu'une version est validée. Dependabot la met ensuite à jour.
 
 2. **Ruleset de `main`.** Dépôt → Settings → Rules → Rulesets. Mêmes règles que celles de ce dépôt : suppression et force-push interdits, commits signés, PR obligatoire avec 1 review, merge en squash seul, et le check « Contrôle des PR » obligatoire une fois qu'il a tourné une première fois.
 
@@ -125,5 +125,5 @@ Ces briques sont prévues par la charte mais n'existent pas encore. Elles viendr
 - Le compte robot `abnd-bot` (R14).
 - `org-config` : rulesets, labels et équipes décrits en code (R7). Sur le plan gratuit, il applique le même ruleset à chaque dépôt.
 - Les dépôts `template` (R21), `inventaire` privé (R13), et le miroir hors GitHub (R1).
-- Renovate et release-please (R23, R24).
+- release-please (R23) ; Dependabot avec quarantaine de 7 jours (R24).
 - Le kanban d'orga (R6).
