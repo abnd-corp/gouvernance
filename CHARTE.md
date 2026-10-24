@@ -16,6 +16,8 @@ Tout le code d'Abnd vit sur GitHub, et rien n'arrive sur `main` sans passer par 
 - **R6 · Le travail se suit dans un seul kanban d'orga, fait des issues elles-mêmes.** Colonnes Backlog → Todo → In progress → In review → Done. Une issue créée arrive seule dans Backlog, la PR qui la ferme la passe en Done : aucune double saisie. Une tâche qui n'y est pas n'existe pas.
 - **R45 · Tous les projets suivent le même chemin : `feature/** → dev → staging → main`.** Chaque marche se passe par une PR. `dev` n'accepte que `feature/**` (et `dependabot/**`) et se merge en squash ; `staging` n'accepte que `dev`, et `main` que `staging`, tous deux en merge commit (un squash créerait un commit absent de la branche source et des conflits à la promotion suivante). Une PR ne se merge que si la CI est verte et si le contrôle « Branche source autorisée » passe. Les branches autres que `feature/**` et `dependabot/**` ne se créent pas. La mise en place est décrite dans [docs/mise-en-oeuvre.md](docs/mise-en-oeuvre.md). Un projet qui ne peut pas le suivre l'écrit dans un ADR (R25).
 - **R7 · Les règles de l'orga sont du code.** Rulesets, labels, équipes et configs partagées vivent dans `org-config`. On les change par PR, le bot les applique à tous les repos, et chaque changement garde son historique. Fini les réglages cliqués repo par repo.
+- **R46 · Pas d'issue sans échéance.** Chaque issue est rattachée à un jalon (milestone) qui a une date d'échéance. C'est obligatoire. GitHub ne peut pas empêcher de créer une issue sans jalon : le bot signale celles qui n'en ont pas, et une issue dont l'échéance est dépassée et qui n'est pas fermée est « en retard » dans le rapport. Repousser une échéance se fait en commentaire, avec la raison.
+- **R47 · L'assignation est facultative.** Une issue peut n'avoir personne, une personne ou plusieurs (GitHub en accepte jusqu'à 10). Pour désigner le domaine responsable (R34), on ajoute un label `domaine:<nom>`.
 
 ## Sécurité et accès
 
@@ -124,6 +126,7 @@ Le radar (On adopte, On essaie, On évalue, On évite) sera tenu dans `docs/stac
 | Formation avant le premier client | Obligatoire. | Rôles et périmètres |
 | Flux de branches | `feature/** → dev → staging → main` pour tous les projets, comme Abatelier. | R2, R4, R45 |
 | Images de conteneurs | Sur GHCR, privées. Le jeton de lecture pour les serveurs est prévu plus tard. | R44 |
+| Échéance des issues | Obligatoire, portée par la date d'un jalon. L'assignation reste facultative, à plusieurs si besoin. | R46, R47 |
 | Offre GitHub payante | Non. On reste sur le plan gratuit : pas de rulesets d'organisation, chaque dépôt public a le sien (voir [docs/mise-en-oeuvre.md](docs/mise-en-oeuvre.md)). | R7, R22 |
 
 ## Faire évoluer la charte

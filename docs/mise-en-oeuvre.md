@@ -98,6 +98,17 @@ Une image par mise en production, c'est aussi une image de plus à chaque promot
 
 Limite connue : avec le jeton du workflow, on ne peut pas exclure les tags de version du nettoyage ; un jeton dédié le permettra plus tard.
 
+## Les échéances (R46)
+
+GitHub n'a pas de date d'échéance propre à une issue. Dans la charte, l'échéance d'une issue est **la date du jalon auquel elle appartient** : un jalon (milestone) avec une date de fin. C'est natif, visible dans la liste des issues, et interrogeable par le bot.
+
+- Créer un jalon : onglet *Issues* → *Milestones* → *New milestone*, avec une **Due date**.
+- Rattacher une issue : colonne de droite de l'issue → *Milestone*.
+- Une échéance plus fine qu'un jalon existant se fait avec un jalon court (par exemple « Semaine du 3 novembre »).
+- Quand le kanban d'orga existera (R6), son champ « Échéance » pourra remplacer le jalon : la règle ne change pas, seul l'endroit où l'on lit la date.
+
+Les issues sans jalon daté ne sont pas bloquées : le bot les liste dans le rapport des issues, et les modèles d'issue rappellent d'indiquer l'échéance.
+
 ## Projets déjà en place
 
 | Projet | État |
