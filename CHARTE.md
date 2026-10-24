@@ -35,7 +35,7 @@ Un accès se donne nominativement, se trace et se retire le jour du départ.
 Les agents IA sont des contributeurs comme les autres : ils proposent, un humain valide.
 
 - **R14 · Une seule identité pour les robots.** Tous les agents et automatisations passent par `abnd-bot`. Plus aucun token personnel dans les secrets.
-- **R15 · Un agent ne merge jamais seul.** Il ouvre une PR, l'un de nous la relit et l'approuve.
+- **R15 · Un agent ne merge jamais seul.** Il ouvre une PR, l'un de nous la relit et l'approuve. Seule exception : une PR qui ne fait que monter des versions de dépendances (R4), et les promotions `dev` → `staging` → `main` qui ne portent que de telles PR, avec une CI verte à chaque marche, quand un humain le lui demande explicitement. Un agent ne merge aucune autre PR.
 - **R16 · Aucune signature d'IA dans l'historique.** Pas de co-auteur, de signature d'outil ni de mention d'IA dans les commits, les titres ou les descriptions de PR. Un hook local bloque avant le push, et un check de CI refuse la PR. Seul le fichier `AGENTS.md` (R17) montre qu'on utilise des agents.
 - **R17 · Une fiche commune pour tous les contributeurs, humains et agents.** Les règles vivent dans `CONTRIBUTING.md`. Un `AGENTS.md` court y renvoie, pour que les agents les trouvent seuls, sans configuration. Les deux viennent de `org-config` et le bot les recopie dans chaque repo. Personne ne les modifie à la main dans un repo.
 - **R18 · Un agent ne lit ni n'écrit jamais de secret** (`.env`, clés, tokens). On ne peut pas le prouver à 100 %, donc on verrouille : les réglages des agents leur interdisent ces fichiers, aucun secret de production n'est sur nos machines de dev, et le scanner de secrets (R9) sert de filet. Au moindre doute, on fait tourner le secret.
@@ -119,6 +119,7 @@ Le radar (On adopte, On essaie, On évalue, On évite) sera tenu dans `docs/stac
 |---|---|---|
 | Nom de l'orga | `abnd-corp`. | Toutes |
 | Review obligatoire pour nos propres PR | Oui, pour toutes. Sur le critique, deux personnes plus l'IA. | R4, R15, R35 |
+| Merge par un agent | Seulement une PR de montée de dépendances, et ses promotions jusqu'à `main` si elles ne portent que ça. CI verte à chaque marche, sur demande explicite d'un humain. | R4, R15 |
 | Romain et Lucas | Pas membres de l'orga pour l'instant : membres associés, avec un accès au cas par cas sur les repos où ils contribuent. Ça peut évoluer, Lucas en premier vu ce qu'il a déjà apporté. | R27, R28 |
 | Repos actifs | Tous restent actifs, y compris abnd, abwatch, Abloue et Abcarte. | R26 |
 | Rapports par mail | Depuis une adresse du domaine abnd. Avancement le lundi, santé le 1er du mois. | R11 |
