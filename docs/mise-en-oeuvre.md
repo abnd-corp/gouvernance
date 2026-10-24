@@ -151,11 +151,14 @@ Reste à faire : l'ajout automatique des issues de **tous** les dépôts (le pla
 
 Ces briques sont prévues par la charte mais n'existent pas encore. Elles viendront par issues :
 
-- **Sauvegarde hors GitHub (R1)** : miroir des dépôts, export des issues, PR et kanban dans `inventaire`, et `docs/reprise.md`. Détails à décider : où est la copie, et comment la protéger si le compte GitHub est compromis.
+- **Sauvegarde hors GitHub (R1)** : miroir des dépôts, export des issues, PR et kanban, et `docs/reprise.md`. Deux copies indépendantes, sur la Raspberry de Rudy et sur le serveur de Hugo. Chaque copie va chercher les données sur GitHub en lecture seule, garde des instantanés datés sans jamais écraser les précédents, et supprime ceux de plus de 12 semaines.
 - Secret scanning et push protection sur chaque dépôt (R9).
 - Dependabot avec quarantaine de 7 jours dans tous les dépôts (R24) : PR ouvertes dans les dépôts qui n'en avaient pas ; `bot` et `abatelier` en ont un sans quarantaine, à compléter.
 - `org-config` : rulesets, labels et équipes décrits en code (R7).
 - release-please (R23).
 - Ajout automatique des issues au kanban, `docs/stack.md` par projet et radar de stack (R39, R37, R38).
 - Contrôle d'écart « Closes #N » dans le contrôle de PR (R3).
-- Revue des accès : Lucas-ui est propriétaire de l'orga alors que la charte prévoit un accès au cas par cas.
+
+## Accès à l'orga
+
+Trois propriétaires : Rudy, Hugo et Lucas-ui. C'est un choix assumé (25 octobre 2026) : Lucas-ui reste propriétaire. Romain n'est pas membre.

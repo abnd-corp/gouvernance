@@ -122,7 +122,7 @@ Le radar (On adopte, On essaie, On évalue, On évite) sera tenu dans `docs/stac
 | Review obligatoire pour nos propres PR | Oui, pour toutes. Sur le critique, deux personnes plus l'IA. | R4, R15, R35 |
 | Décision entre dirigeants | Rudy et Hugo décident chacun seul, y compris sur la charte. Plus d'approbation de l'autre exigée. | R4, R33, R48 |
 | Merge par un agent | Possible pour toute PR, jusqu'à `main`, sur demande explicite d'un humain et CI verte à chaque marche. | R4, R15 |
-| Romain et Lucas | Pas membres de l'orga pour l'instant : membres associés, avec un accès au cas par cas sur les repos où ils contribuent. Ça peut évoluer, Lucas en premier vu ce qu'il a déjà apporté. | R27, R28 |
+| Romain et Lucas | Lucas est propriétaire de l'orga, comme Rudy et Hugo (décision du 25 octobre 2026). Romain n'est pas membre : membre associé, avec un accès au cas par cas sur les repos où il contribue. | R27, R28 |
 | Repos actifs | Tous restent actifs, y compris abnd, abwatch, Abloue et Abcarte. | R26 |
 | Rapports par mail | Depuis une adresse du domaine abnd. Avancement le lundi, santé le 1er du mois. | R11 |
 | Visibilité de l'IA dans les repos | `AGENTS.md` assumé dans chaque repo, aucune signature d'IA dans l'historique. | R16, R17 |
