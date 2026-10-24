@@ -13,7 +13,7 @@ Ces règles valent pour tous les contributeurs d'Abnd, humains et agents (R17). 
 7. **Aucun secret**, ni dans le code ni dans un message (R9, R18).
 8. **Une nouvelle dépendance se justifie dans la PR** (R19).
 9. **Une décision technique importante s'écrit** dans `docs/adr/` (R25).
-10. **Une review humaine approuve** avant le merge, en squash (R4, R15). Sur la sécurité, l'infra, les accès et la facturation : deux personnes plus une review par IA (R35).
+10. **Une review humaine approuve** avant le merge, en squash (R4, R15). Exception : une PR qui ne fait que monter des versions de dépendances, avec une CI verte, se merge sans second reviewer. Sur la sécurité, l'infra, les accès et la facturation : deux personnes plus une review par IA (R35).
 
 ## Pour les agents
 
