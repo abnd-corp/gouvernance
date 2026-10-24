@@ -135,7 +135,7 @@ Reste à faire : l'ajout automatique des issues de **tous** les dépôts (le pla
 
 | Projet | État |
 |---|---|
-| abatelier | Branches `feature → dev → staging → main`, CI propre, Dependabot avec quarantaine, contrôle de PR partagé. |
+| abatelier | Branches `feature → dev → staging → main`, CI propre, contrôle de PR partagé, Dependabot (sans quarantaine à ce jour). |
 | abnd | Chemin de branches commun en place, contrôle de PR partagé. Dependabot en cours (PR ouverte). |
 | bot | Chemin de branches commun, `AGENTS.md`, Dependabot (sans quarantaine à ce jour). |
 | gouvernance | `main` seul, PR en squash, 0 approbation exigée (R48). |
@@ -153,7 +153,7 @@ Ces briques sont prévues par la charte mais n'existent pas encore. Elles viendr
 
 - **Sauvegarde hors GitHub (R1)** : miroir des dépôts, export des issues, PR et kanban dans `inventaire`, et `docs/reprise.md`. Détails à décider : où est la copie, et comment la protéger si le compte GitHub est compromis.
 - Secret scanning et push protection sur chaque dépôt (R9).
-- Dependabot avec quarantaine de 7 jours dans tous les dépôts (R24) : PR ouvertes, à merger.
+- Dependabot avec quarantaine de 7 jours dans tous les dépôts (R24) : PR ouvertes dans les dépôts qui n'en avaient pas ; `bot` et `abatelier` en ont un sans quarantaine, à compléter.
 - `org-config` : rulesets, labels et équipes décrits en code (R7).
 - release-please (R23).
 - Ajout automatique des issues au kanban, `docs/stack.md` par projet et radar de stack (R39, R37, R38).
