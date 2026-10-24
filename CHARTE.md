@@ -83,6 +83,7 @@ Chaque domaine sur lequel on travaille vraiment a un responsable et un suppléan
 - **R34 · Sur un projet client ou avec des personnes extérieures, chaque domaine a un responsable et un suppléant.** Le responsable tranche en dernier recours et est reviewer par défaut sur son périmètre (CODEOWNERS). Sur un projet entre nous, c'est facultatif.
 - **R35 · Personne n'est seul sur un domaine critique.** Sur la sécurité, l'infra, les accès et la facturation, le suppléant sait reprendre le sujet du jour au lendemain. Une PR y demande une validation à trois : deux personnes plus une review par IA.
 - **R36 · La carte des rôles est revue à chaque arrivée ou départ,** et sinon en même temps que la revue des projets dormants (R26), en un quart d'heure. Un domaine marqué « Manque » donne lieu à une décision : quelqu'un le prend, on le confie à un robot ou un outil, on le sous-traite, ou on accepte le manque en connaissance de cause.
+- **R48 · Rudy et Hugo sont les dirigeants, et chacun décide seul.** Un changement fait par l'un des deux, sur la charte, un projet ou l'orga, n'a pas besoin de l'approbation de l'autre. On se prévient, on ne se bloque pas : l'historique et les PR gardent la trace (R33). Aucun ruleset n'exige donc d'approbation sur nos propres PR ; la CI reste obligatoire.
 
 ### Domaines
 
@@ -119,6 +120,7 @@ Le radar (On adopte, On essaie, On évalue, On évite) sera tenu dans `docs/stac
 |---|---|---|
 | Nom de l'orga | `abnd-corp`. | Toutes |
 | Review obligatoire pour nos propres PR | Oui, pour toutes. Sur le critique, deux personnes plus l'IA. | R4, R15, R35 |
+| Décision entre dirigeants | Rudy et Hugo décident chacun seul, y compris sur la charte. Plus d'approbation de l'autre exigée. | R4, R33, R48 |
 | Merge par un agent | Possible pour toute PR, jusqu'à `main`, sur demande explicite d'un humain et CI verte à chaque marche. | R4, R15 |
 | Romain et Lucas | Pas membres de l'orga pour l'instant : membres associés, avec un accès au cas par cas sur les repos où ils contribuent. Ça peut évoluer, Lucas en premier vu ce qu'il a déjà apporté. | R27, R28 |
 | Repos actifs | Tous restent actifs, y compris abnd, abwatch, Abloue et Abcarte. | R26 |
