@@ -109,21 +109,53 @@ GitHub n'a pas de date d'échéance propre à une issue. Dans la charte, l'éch�
 
 Les issues sans jalon daté ne sont pas bloquées : le bot les liste dans le rapport des issues, et les modèles d'issue rappellent d'indiquer l'échéance.
 
+## Qui peut merger quoi (R4, R15, R48)
+
+- **Rudy et Hugo décident chacun seul** (R48). Aucun ruleset n'exige d'approbation sur nos propres PR : `required_approving_review_count` est à 0 sur `gouvernance`, `abnd` et `abatelier`. La CI reste obligatoire.
+- **Un agent peut merger** une PR, promotions jusqu'à `main` comprises, quand un humain le lui demande explicitement et que la CI est verte à chaque marche (R15). Il ne le fait jamais de sa propre initiative.
+- **Une PR de montée de dépendances** n'a pas besoin d'un second reviewer (R4).
+- Pour que le merge soit possible, le ruleset ne doit pas exiger de revue : si GitHub répond « base branch policy prohibits the merge », vérifier d'abord `required_approving_review_count`.
+
+## Le compte du bot : une GitHub App (R14)
+
+Il n'y a pas de compte utilisateur `abnd-bot`. L'identité du bot est une **GitHub App** de l'organisation, `abnd-bot` (App ID `5460286`), installée sur tous les dépôts.
+
+- Droits : Metadata, Dependabot alerts, Checks et Commit statuses en lecture ; Contents, Pull requests et Issues en écriture ; Organization projects en écriture. Pas d'Administration, pas de Secrets, pas de Members.
+- Le dépôt `bot` garde la variable `APP_ID` et le secret `APP_PRIVATE_KEY`. Le workflow `alertes.yml` demande un jeton d'installation à chaque passage (`actions/create-github-app-token`, figée sur son empreinte).
+- La clé privée n'existe qu'en secret du dépôt `bot` : elle n'est ni sur un disque ni dans un message. Si elle est perdue ou compromise, on en génère une autre dans les réglages de l'App et on remplace le secret.
+- Les actions d'un agent de code passent pour l'instant par le compte de la personne qui l'utilise.
+
+## Le kanban d'orga (R6)
+
+Le projet [Abnd](https://github.com/orgs/abnd-corp/projects/2) regroupe les issues de tous les dépôts. Colonnes : Backlog, Todo, In progress, Done. Les automatismes du projet sont activés : une issue ajoutée arrive en Backlog, une PR liée la passe en In progress, la fermeture ou le merge la passe en Done.
+
+Reste à faire : l'ajout automatique des issues de **tous** les dépôts (le plan gratuit n'autorise qu'une règle d'ajout par projet). Une issue créée dans un dépôt doit encore être ajoutée au projet à la main, tant qu'un workflow partagé ne le fait pas, avec le jeton de l'App.
+
 ## Projets déjà en place
 
 | Projet | État |
 |---|---|
-| abatelier | Branches `feature → dev → staging → main` (plus strict que la charte), CI propre. À rattacher : contrôle de PR partagé, renvoi vers la charte. |
+| abatelier | Branches `feature → dev → staging → main`, CI propre, Dependabot avec quarantaine, contrôle de PR partagé. |
+| abnd | Chemin de branches commun en place, contrôle de PR partagé. Dependabot en cours (PR ouverte). |
+| bot | Chemin de branches commun, `AGENTS.md`, Dependabot (sans quarantaine à ce jour). |
+| gouvernance | `main` seul, PR en squash, 0 approbation exigée (R48). |
 | Autres projets de l'orga | À rattacher un par un, voir les issues de ce dépôt. |
+
+## Ce qui est en place
+
+- 2FA obligatoire sur l'orga (R8).
+- Dépôts `org-config`, `template`, `inventaire` (privé) et `bot` créés. Le contenu de `org-config` et de `template` reste à vérifier.
+- GitHub App du bot (R14), kanban d'orga (R6), merge par un agent encadré (R15).
 
 ## Ce qui reste à mettre en place
 
-Ces briques sont prévues par la charte mais n'existent pas encore. Elles viendront par issues, dans l'ordre :
+Ces briques sont prévues par la charte mais n'existent pas encore. Elles viendront par issues :
 
-- 2FA obligatoire sur l'orga (R8).
+- **Sauvegarde hors GitHub (R1)** : miroir des dépôts, export des issues, PR et kanban dans `inventaire`, et `docs/reprise.md`. Détails à décider : où est la copie, et comment la protéger si le compte GitHub est compromis.
 - Secret scanning et push protection sur chaque dépôt (R9).
-- Le compte robot `abnd-bot` (R14).
-- `org-config` : rulesets, labels et équipes décrits en code (R7). Sur le plan gratuit, il applique le même ruleset à chaque dépôt.
-- Les dépôts `template` (R21), `inventaire` privé (R13), et le miroir hors GitHub (R1).
-- release-please (R23) ; Dependabot avec quarantaine de 7 jours (R24).
-- Le kanban d'orga (R6).
+- Dependabot avec quarantaine de 7 jours dans tous les dépôts (R24) : PR ouvertes, à merger.
+- `org-config` : rulesets, labels et équipes décrits en code (R7).
+- release-please (R23).
+- Ajout automatique des issues au kanban, `docs/stack.md` par projet et radar de stack (R39, R37, R38).
+- Contrôle d'écart « Closes #N » dans le contrôle de PR (R3).
+- Revue des accès : Lucas-ui est propriétaire de l'orga alors que la charte prévoit un accès au cas par cas.
