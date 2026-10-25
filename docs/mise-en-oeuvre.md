@@ -113,7 +113,7 @@ Les issues sans jalon daté ne sont pas bloquées : le bot les liste dans le rap
 
 Le workflow `controle-pr.yml` vérifie trois choses : le titre en Conventional Commits (R5), l'absence de signature d'IA (R16) et, pour une PR de branche `feature/**`, la présence de « Closes #N » dans la description (R3). Les promotions et les PR de Dependabot ne sont pas concernées par R3.
 
-Chaque projet appelle ce workflow sur une version précise (empreinte de commit, R24) : le contrôle R3 n'arrive chez lui qu'avec la montée de version proposée par Dependabot. Il n'est ajouté aux contrôles obligatoires des rulesets (`org-config`) qu'une fois les projets à jour, pour ne bloquer personne.
+Chaque projet appelle ce workflow sur une version précise (empreinte de commit, R24) : le contrôle R3 n'arrive chez lui qu'avec la montée de version. Il est **obligatoire sur `dev`** (option `closes` de `depots.json` dans `org-config`) pour les dépôts qui appellent la version du contrôle qui le porte : Abnd, Abatelier, Abloue, Abyss, Abvance, Abwatch et template. Une PR sans « Closes #N » y est refusée par GitHub. Abcom, AbX2T et Abcarte ne l'ont pas encore (CI rouge pour les deux premiers, issues désactivées sur Abcarte). Pour rendre le contrôle obligatoire dans un dépôt : mettre à jour son appel au contrôle de PR, puis passer `closes` à `true` dans `depots.json` et lancer `scripts/appliquer.sh <depot>`.
 
 ## Fermer les issues au merge dans `dev` (R3, R6)
 
@@ -188,7 +188,8 @@ Pour filtrer la liste des dépôts : `props.type:projet` dans la barre de recher
 - GitHub App du bot (R14), kanban d'orga (R6), merge par un agent encadré (R15).
 - Secret scanning et push protection (R9) sur les 14 dépôts publics, et par défaut sur tout nouveau dépôt de l'orga (avec les alertes et correctifs de sécurité Dependabot). Les dépôts privés (`bot`, `inventaire`, `Documentation`) n'y ont pas droit sur le plan gratuit : R9 y repose sur la discipline (R18).
 - Dependabot avec quarantaine de 7 jours dans tous les dépôts publics (R24), et « Dependabot security updates » activé sur chacun : les correctifs de sécurité ouvrent une PR sans attendre la quarantaine.
-- Contrôle « Closes #N » dans le contrôle de PR partagé (R3). Il n'est pas encore obligatoire dans les rulesets : à faire quand les projets auront mis à jour leur version du contrôle.
+- Contrôle « Closes #N » dans le contrôle de PR partagé (R3), obligatoire sur `dev` dans 7 dépôts (voir plus haut).
+- Checklist de départ (R12) : [depart.md](depart.md).
 
 ## Un départ (R12)
 
