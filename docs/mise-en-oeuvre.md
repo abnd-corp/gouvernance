@@ -131,6 +131,18 @@ Le projet [Abnd](https://github.com/orgs/abnd-corp/projects/2) regroupe les issu
 
 Reste à faire : l'ajout automatique des issues de **tous** les dépôts (le plan gratuit n'autorise qu'une règle d'ajout par projet). Une issue créée dans un dépôt doit encore être ajoutée au projet à la main, tant qu'un workflow partagé ne le fait pas, avec le jeton de l'App.
 
+## Classer les dépôts : la propriété `type`
+
+Chaque dépôt de l'orga porte une propriété personnalisée `type` (Settings de l'orga → Custom properties). Trois valeurs :
+
+| Valeur | Sens | Dépôts |
+|---|---|---|
+| `gestion` | Ce qui fait fonctionner l'orga elle-même | gouvernance, org-config, template, inventaire, bot, Documentation |
+| `projet` | Un produit réel | Abatelier, AbSante, Abnd, Abvance, Abyss, Abcom, AbX2T, Abcarte, Abloue, Abwatch |
+| `test` | Un dépôt d'essai | abflow-skill-doc-test |
+
+Pour filtrer la liste des dépôts : `props.type:projet` dans la barre de recherche. Un nouveau dépôt reçoit sa valeur à sa création ; la propriété peut servir plus tard à cibler des rulesets.
+
 ## Projets déjà en place
 
 | Projet | État |
