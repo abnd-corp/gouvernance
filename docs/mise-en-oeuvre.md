@@ -190,6 +190,10 @@ Pour filtrer la liste des dépôts : `props.type:projet` dans la barre de recher
 - Dependabot avec quarantaine de 7 jours dans tous les dépôts publics (R24), et « Dependabot security updates » activé sur chacun : les correctifs de sécurité ouvrent une PR sans attendre la quarantaine.
 - Contrôle « Closes #N » dans le contrôle de PR partagé (R3). Il n'est pas encore obligatoire dans les rulesets : à faire quand les projets auront mis à jour leur version du contrôle.
 
+## Un départ (R12)
+
+La checklist est dans [depart.md](depart.md), avec un modèle d'issue « Départ d'un membre ». Elle couvre les accès GitHub, les secrets à changer (clé de l'App, jeton Matrix), les serveurs, les comptes à son nom et la fiche `inventaire`.
+
 ## Ce qui reste à mettre en place
 
 Ces briques sont prévues par la charte mais n'existent pas encore. Elles viendront par issues :
