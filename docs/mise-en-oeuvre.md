@@ -156,7 +156,7 @@ Il n'y a pas de compte utilisateur `abnd-bot`. L'identité du bot est une **GitH
 
 Le projet [Abnd](https://github.com/orgs/abnd-corp/projects/2) regroupe les issues de tous les dépôts. Colonnes : Backlog, Todo, In progress, Done. Les automatismes du projet sont activés : une issue ajoutée arrive en Backlog, une PR liée la passe en In progress, la fermeture ou le merge la passe en Done.
 
-Reste à faire : l'ajout automatique des issues de **tous** les dépôts (le plan gratuit n'autorise qu'une règle d'ajout par projet). Une issue créée dans un dépôt doit encore être ajoutée au projet à la main, tant qu'un workflow partagé ne le fait pas, avec le jeton de l'App.
+Le plan gratuit n'autorise qu'une règle d'ajout automatique par projet, et « Closes #N » ne ferme une issue que si la PR est mergée dans la branche par défaut (`main`), alors que nos PR vont vers `dev`. C'est donc le **bot** qui tient le projet : le workflow `kanban.yml` du dépôt `bot` passe chaque heure (minute 30), ajoute en Backlog les issues ouvertes absentes du projet, et met en Done puis ferme celles qu'une PR mergée annonce fermer (« Closes #N », fenêtre de 30 jours). Une issue peut donc rester ouverte jusqu'à une heure après le merge de sa PR.
 
 ## Classer les dépôts : la propriété `type`
 
@@ -178,6 +178,7 @@ Pour filtrer la liste des dépôts : `props.type:projet` dans la barre de recher
 | abnd | Chemin de branches commun en place, contrôle de PR partagé. Dependabot en cours (PR ouverte). |
 | bot | Chemin de branches commun, `AGENTS.md`, Dependabot (sans quarantaine à ce jour). |
 | gouvernance | `main` seul, PR en squash, 0 approbation exigée (R48). |
+| AbSante | Son ruleset d'origine, pas celui d'`org-config` : le contrôle « Branche source autorisée » refuserait la PR quotidienne des données RPPS, qui vise `main` (décision du 25 octobre). Il n'exige plus que la branche soit à jour avec `main`, ce qui bloquait les promotions. |
 | Autres projets de l'orga | À rattacher un par un, voir les issues de ce dépôt. |
 
 ## Ce qui est en place
@@ -185,6 +186,8 @@ Pour filtrer la liste des dépôts : `props.type:projet` dans la barre de recher
 - 2FA obligatoire sur l'orga (R8).
 - Dépôts `org-config`, `template`, `inventaire` (privé) et `bot` créés. Le contenu de `org-config` et de `template` reste à vérifier.
 - GitHub App du bot (R14), kanban d'orga (R6), merge par un agent encadré (R15).
+- Dependabot avec quarantaine de 7 jours dans tous les dépôts publics (R24), et « Dependabot security updates » activé sur chacun : les correctifs de sécurité ouvrent une PR sans attendre la quarantaine.
+- Contrôle « Closes #N » dans le contrôle de PR partagé (R3). Il n'est pas encore obligatoire dans les rulesets : à faire quand les projets auront mis à jour leur version du contrôle.
 
 ## Ce qui reste à mettre en place
 
@@ -192,10 +195,9 @@ Ces briques sont prévues par la charte mais n'existent pas encore. Elles viendr
 
 - **Sauvegarde hors GitHub (R1)** : miroir des dépôts, export des issues, PR et kanban, et `docs/reprise.md`. Deux copies indépendantes, sur la Raspberry de Rudy et sur le serveur de Hugo. Chaque copie va chercher les données sur GitHub en lecture seule, garde des instantanés datés sans jamais écraser les précédents, et supprime ceux de plus de 12 semaines.
 - Secret scanning et push protection sur chaque dépôt (R9).
-- Dependabot avec quarantaine de 7 jours dans tous les dépôts (R24) : PR ouvertes dans les dépôts qui n'en avaient pas ; `bot` et `abatelier` en ont un sans quarantaine, à compléter.
 - `org-config` : rulesets, labels et équipes décrits en code (R7).
 - release-please (R23).
-- Ajout automatique des issues au kanban, `docs/stack.md` par projet et radar de stack (R39, R37, R38).
+- `docs/stack.md` par projet et radar de stack (R39, R37, R38).
 
 ## Accès à l'orga
 
