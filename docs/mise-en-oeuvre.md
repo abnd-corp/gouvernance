@@ -186,6 +186,7 @@ Pour filtrer la liste des dépôts : `props.type:projet` dans la barre de recher
 - 2FA obligatoire sur l'orga (R8).
 - Dépôts `org-config`, `template`, `inventaire` (privé) et `bot` créés. Le contenu de `org-config` et de `template` reste à vérifier.
 - GitHub App du bot (R14), kanban d'orga (R6), merge par un agent encadré (R15).
+- Secret scanning et push protection (R9) sur les 14 dépôts publics, et par défaut sur tout nouveau dépôt de l'orga (avec les alertes et correctifs de sécurité Dependabot). Les dépôts privés (`bot`, `inventaire`, `Documentation`) n'y ont pas droit sur le plan gratuit : R9 y repose sur la discipline (R18).
 - Dependabot avec quarantaine de 7 jours dans tous les dépôts publics (R24), et « Dependabot security updates » activé sur chacun : les correctifs de sécurité ouvrent une PR sans attendre la quarantaine.
 - Contrôle « Closes #N » dans le contrôle de PR partagé (R3). Il n'est pas encore obligatoire dans les rulesets : à faire quand les projets auront mis à jour leur version du contrôle.
 
@@ -194,7 +195,6 @@ Pour filtrer la liste des dépôts : `props.type:projet` dans la barre de recher
 Ces briques sont prévues par la charte mais n'existent pas encore. Elles viendront par issues :
 
 - **Sauvegarde hors GitHub (R1)** : miroir des dépôts, export des issues, PR et kanban, et `docs/reprise.md`. Deux copies indépendantes, sur la Raspberry de Rudy et sur le serveur de Hugo. Chaque copie va chercher les données sur GitHub en lecture seule, garde des instantanés datés sans jamais écraser les précédents, et supprime ceux de plus de 12 semaines.
-- Secret scanning et push protection sur chaque dépôt (R9).
 - `org-config` : rulesets, labels et équipes décrits en code (R7).
 - release-please (R23).
 - `docs/stack.md` par projet et radar de stack (R39, R37, R38).
