@@ -78,7 +78,7 @@ Ce que l'orga possède et qui y a accès est écrit quelque part, en un seul end
 
 ## Rôles et périmètres
 
-Chaque domaine sur lequel on travaille vraiment a un responsable et un suppléant. On reste polyvalents : le responsable n'est pas le seul à y travailler, il veille à ce que ce soit fait.
+À deux, on ne nomme pas de responsable ni de suppléant : la table ci-dessous reste « à définir » et R34 à R36 s'appliqueront quand l'équipe grandit ou qu'un client arrive. Dès ce moment, chaque domaine sur lequel on travaille vraiment a un responsable et un suppléant. On reste polyvalents : le responsable n'est pas le seul à y travailler, il veille à ce que ce soit fait.
 
 - **R34 · Sur un projet client ou avec des personnes extérieures, chaque domaine a un responsable et un suppléant.** Le responsable tranche en dernier recours et est reviewer par défaut sur son périmètre (CODEOWNERS). Sur un projet entre nous, c'est facultatif.
 - **R35 · Personne n'est seul sur un domaine critique.** Sur la sécurité, l'infra, les accès et la facturation, le suppléant sait reprendre le sujet du jour au lendemain. Une PR y demande une validation à trois : deux personnes plus une review par IA.
@@ -100,7 +100,7 @@ Chaque domaine sur lequel on travaille vraiment a un responsable et un suppléan
 
 ### À couvrir avant le premier client
 
-Aucun de nous ne maîtrise encore ces sujets, et ce n'est pas un problème tant qu'on n'a pas de client. **Se former est obligatoire** : avant de signer le premier client, on se forme sur chacun d'eux.
+Aucun de nous ne maîtrise encore ces sujets, et ce n'est pas un problème tant qu'on n'a pas de client. **Se former est facultatif** : on y pense quand un premier client arrive, pas avant. On reprend alors chacun de ces sujets.
 
 - **Comprendre le besoin du client** et le traduire en tickets, puis être son interlocuteur pendant le projet.
 - **Devis et contrat** : chiffrer un projet, poser ce qui est inclus ou non.
@@ -122,11 +122,12 @@ Le radar (On adopte, On essaie, On évalue, On évite) sera tenu dans `docs/stac
 | Review obligatoire pour nos propres PR | Oui, pour toutes. Sur le critique, deux personnes plus l'IA. | R4, R15, R35 |
 | Décision entre dirigeants | Rudy et Hugo décident chacun seul, y compris sur la charte. Plus d'approbation de l'autre exigée. | R4, R33, R48 |
 | Merge par un agent | Possible pour toute PR, jusqu'à `main`, sur demande explicite d'un humain et CI verte à chaque marche. | R4, R15 |
-| Romain et Lucas | Pas membres de l'orga pour l'instant : membres associés, avec un accès au cas par cas sur les repos où ils contribuent. Ça peut évoluer, Lucas en premier vu ce qu'il a déjà apporté. | R27, R28 |
+| Romain et Lucas | Lucas est propriétaire de l'orga, comme Rudy et Hugo (décision du 25 octobre 2026). Romain n'est pas membre : membre associé, avec un accès au cas par cas sur les repos où il contribue. | R27, R28 |
 | Repos actifs | Tous restent actifs, y compris abnd, abwatch, Abloue et Abcarte. | R26 |
 | Rapports par mail | Depuis une adresse du domaine abnd. Avancement le lundi, santé le 1er du mois. | R11 |
 | Visibilité de l'IA dans les repos | `AGENTS.md` assumé dans chaque repo, aucune signature d'IA dans l'historique. | R16, R17 |
-| Formation avant le premier client | Obligatoire. | Rôles et périmètres |
+| Formation avant le premier client | Facultative : on s'en occupe quand un client arrive. | Rôles et périmètres |
+| Responsables et suppléants | Pas nommés à deux : à appliquer quand l'équipe grandit ou qu'un client arrive. | R34, R35, R36 |
 | Flux de branches | `feature/** → dev → staging → main` pour tous les projets, comme Abatelier. | R2, R4, R45 |
 | Images de conteneurs | Sur GHCR, privées. Le jeton de lecture pour les serveurs est prévu plus tard. | R44 |
 | Échéance des issues | Obligatoire, portée par la date d'un jalon. L'assignation reste facultative, à plusieurs si besoin. | R46, R47 |
