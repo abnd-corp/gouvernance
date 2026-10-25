@@ -115,6 +115,27 @@ Le workflow `controle-pr.yml` vérifie trois choses : le titre en Conventional C
 
 Chaque projet appelle ce workflow sur une version précise (empreinte de commit, R24) : le contrôle R3 n'arrive chez lui qu'avec la montée de version proposée par Dependabot. Il n'est ajouté aux contrôles obligatoires des rulesets (`org-config`) qu'une fois les projets à jour, pour ne bloquer personne.
 
+## Fermer les issues au merge dans `dev` (R3, R6)
+
+Le workflow partagé `fermer-issues.yml` ferme, dès le merge d'une PR dans `dev`, les issues du même dépôt qu'elle cite par « Closes #N ». Le projet d'orga passe alors la carte en Done tout seul. Chaque dépôt l'appelle par un fichier `.github/workflows/fermer-issues.yml` :
+
+```yaml
+name: Fermer les issues
+on:
+  pull_request:
+    types: [closed]
+    branches: [dev]
+permissions:
+  contents: read
+  issues: write
+jobs:
+  fermer:
+    if: github.event.pull_request.merged == true
+    uses: abnd-corp/gouvernance/.github/workflows/fermer-issues.yml@<empreinte>
+```
+
+Le passage horaire du bot reste en filet de sécurité : issues d'un autre dépôt, PR dont le workflow n'a pas tourné.
+
 ## Qui peut merger quoi (R4, R15, R48)
 
 - **Rudy et Hugo décident chacun seul** (R48). Aucun ruleset n'exige d'approbation sur nos propres PR : `required_approving_review_count` est à 0 sur `gouvernance`, `abnd` et `abatelier`. La CI reste obligatoire.
