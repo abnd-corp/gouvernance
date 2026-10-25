@@ -48,7 +48,7 @@ jobs:
           fi
 
   issue:
-    name: Issue liée (Closes #N)
+    name: Issue liée
     runs-on: ubuntu-latest
     steps:
       - name: Chercher Closes #N dans la description
