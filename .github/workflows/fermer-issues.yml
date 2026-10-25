@@ -1,0 +1,35 @@
+# Workflow partagé : ferme les issues citées par « Closes #N » quand une PR est mergée dans dev (R3, R6).
+# GitHub ne le fait que sur la branche par défaut (main) ; or nos PR passent par dev avant d'arriver sur main.
+# Le projet d'orga passe l'issue en Done tout seul à sa fermeture. Les issues d'un autre dépôt sont laissées au passage horaire du bot.
+name: Fermer les issues
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  fermer:
+    name: Fermer les issues citées
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fermer
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEPOT: ${{ github.repository }}
+          NUMERO: ${{ github.event.pull_request.number }}
+          CORPS: ${{ github.event.pull_request.body }}
+          MERGEE: ${{ github.event.pull_request.merged }}
+          BASE: ${{ github.event.pull_request.base.ref }}
+        run: |
+          if [ "$MERGEE" != true ]; then echo "PR fermée sans merge : rien à faire."; exit 0; fi
+          printf '%s\n' "$CORPS" | grep -Eio '(close[sd]?|fix(e[sd])?|resolve[sd]?):? +([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+' | while read -r _ ref; do
+            case "$ref" in
+              \#*) issue="${ref#\#}" ;;
+              "$DEPOT"#*) issue="${ref##*#}" ;;
+              *) echo "$ref : autre dépôt, laissé au passage du bot."; continue ;;
+            esac
+            gh issue close "$issue" -R "$DEPOT" --reason completed --comment "Fermée : la PR #$NUMERO est mergée dans $BASE." || echo "#$issue : pas fermée (déjà fermée, ou ce n'est pas une issue)."
+          done
