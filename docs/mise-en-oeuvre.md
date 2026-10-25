@@ -109,6 +109,12 @@ GitHub n'a pas de date d'échéance propre à une issue. Dans la charte, l'éch�
 
 Les issues sans jalon daté ne sont pas bloquées : le bot les liste dans le rapport des issues, et les modèles d'issue rappellent d'indiquer l'échéance.
 
+## Le contrôle de PR partagé (R3, R5, R16)
+
+Le workflow `controle-pr.yml` vérifie trois choses : le titre en Conventional Commits (R5), l'absence de signature d'IA (R16) et, pour une PR de branche `feature/**`, la présence de « Closes #N » dans la description (R3). Les promotions et les PR de Dependabot ne sont pas concernées par R3.
+
+Chaque projet appelle ce workflow sur une version précise (empreinte de commit, R24) : le contrôle R3 n'arrive chez lui qu'avec la montée de version proposée par Dependabot. Il n'est ajouté aux contrôles obligatoires des rulesets (`org-config`) qu'une fois les projets à jour, pour ne bloquer personne.
+
 ## Qui peut merger quoi (R4, R15, R48)
 
 - **Rudy et Hugo décident chacun seul** (R48). Aucun ruleset n'exige d'approbation sur nos propres PR : `required_approving_review_count` est à 0 sur `gouvernance`, `abnd` et `abatelier`. La CI reste obligatoire.
@@ -169,7 +175,6 @@ Ces briques sont prévues par la charte mais n'existent pas encore. Elles viendr
 - `org-config` : rulesets, labels et équipes décrits en code (R7).
 - release-please (R23).
 - Ajout automatique des issues au kanban, `docs/stack.md` par projet et radar de stack (R39, R37, R38).
-- Contrôle d'écart « Closes #N » dans le contrôle de PR (R3).
 
 ## Accès à l'orga
 

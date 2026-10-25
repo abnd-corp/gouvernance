@@ -1,6 +1,7 @@
 # Workflow partagé : tous les projets l'appellent (R22).
 # R5 : titre de PR en Conventional Commits.
 # R16 : aucune signature d'IA dans les commits, le titre et la description.
+# R3 : une PR de branche feature/** est liée à une issue (Closes #N).
 name: Contrôle des PR
 
 on:
@@ -43,5 +44,23 @@ jobs:
           fi
           if gh api --paginate "repos/$DEPOT/pulls/$NUMERO/commits" --jq '.[].commit.message' | grep -Eiq "$motif"; then
             echo "::error::Signature d'IA dans un message de commit (R16)."
+            exit 1
+          fi
+
+  issue:
+    name: Issue liée (Closes #N)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chercher Closes #N dans la description
+        env:
+          BRANCHE: ${{ github.event.pull_request.head.ref }}
+          CORPS: ${{ github.event.pull_request.body }}
+        run: |
+          case "$BRANCHE" in
+            feature/*) ;;
+            *) echo "Branche $BRANCHE : pas de contrôle (R3 vise les branches feature/**)."; exit 0 ;;
+          esac
+          if ! printf '%s\n' "$CORPS" | grep -Eiq '(close[sd]?|fix(e[sd])?|resolve[sd]?):? +([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+'; then
+            echo "::error::La description doit contenir « Closes #N » avec le numéro de l'issue (R3)."
             exit 1
           fi
