@@ -14,6 +14,7 @@ Ces règles valent pour tous les contributeurs d'Abnd, humains et agents (R17). 
 8. **Une nouvelle dépendance se justifie dans la PR** (R19).
 9. **Une décision technique importante s'écrit** dans `docs/adr/` (R25).
 10. **Une review humaine approuve** avant le merge, en squash (R4, R15). Exception : une PR qui ne fait que monter des versions de dépendances, avec une CI verte, se merge sans second reviewer. Sur la sécurité, l'infra, les accès et la facturation : deux personnes plus une review par IA (R35).
+11. **Une branche fusionnée se supprime** (R49) : GitHub le fait à la fusion, on nettoie sa copie locale en vérifiant d'abord que sa dernière version est celle de la PR.
 
 ## Pour les agents
 

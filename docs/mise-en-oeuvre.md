@@ -60,7 +60,7 @@ Le même pour tous les projets : `feature/** → dev → staging → main`. Un p
 
    Le contrôle de PR (`gouvernance.yml`) ne vise plus `main` mais `dev` : `branches: [dev]`.
 
-2. **Créer `dev` et `staging` et poser les rulesets** : `scripts/appliquer-flux.sh <depot> [--noms] [contrôles de CI du projet…]`. Le script crée les branches depuis `main`, puis pose les rulesets : `dev` en squash, `staging` et `main` en merge commit, avec la CI obligatoire. Sur un dépôt privé il crée seulement les branches (pas de rulesets sur le plan gratuit).
+2. **Créer `dev` et `staging` et poser les rulesets** : `scripts/appliquer-flux.sh <depot> [--noms] [contrôles de CI du projet…]`. Le script active d'abord la suppression des branches fusionnées (R49), crée les branches depuis `main`, puis pose les rulesets : `dev` en squash, `staging` et `main` en merge commit, avec la CI obligatoire. Sur un dépôt privé il crée seulement les branches (pas de rulesets sur le plan gratuit).
 3. **Noter les écarts** dans le README ou un ADR (R21, R25).
 
 Ce dépôt (`gouvernance`) ne suit pas ce chemin : il ne contient que de la documentation et des workflows, `main` y reçoit des PR en squash avec une review (voir l'ADR 0001).

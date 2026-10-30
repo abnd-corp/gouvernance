@@ -4,7 +4,7 @@ Ce dépôt est la source de vérité des règles de l'organisation [abnd-corp](h
 
 | Fichier | Rôle |
 |---|---|
-| [CHARTE.md](CHARTE.md) | Les règles (R1 à R44) : ce qui est la règle |
+| [CHARTE.md](CHARTE.md) | Les règles (R1 à R49) : ce qui est la règle |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Comment contribuer, pour les humains et les agents |
 | [docs/mise-en-oeuvre.md](docs/mise-en-oeuvre.md) | Comment un projet se rattache à la gouvernance |
 | [docs/adr/](docs/adr/) | Les décisions de gouvernance, une page chacune |

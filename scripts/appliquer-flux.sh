@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Applique le chemin feature/** → dev → staging → main (R45) à un dépôt de l'orga :
-# crée dev et staging depuis main s'ils manquent, puis pose les rulesets (dépôts publics seulement,
+# active la suppression des branches fusionnées (R49), crée dev et staging depuis main s'ils manquent, puis pose les rulesets (dépôts publics seulement,
 # les rulesets ne sont pas disponibles sur un dépôt privé du plan gratuit).
 #
 # Usage : scripts/appliquer-flux.sh <depot> [--noms] [contrôle de CI obligatoire…]
@@ -17,6 +17,9 @@ api() { gh api "$@"; }
 
 visibilite=$(api "repos/$org/$depot" --jq .visibility)
 [ "$visibilite" = public ] || { echo "$depot est privé : rulesets indisponibles sur le plan gratuit, branches créées seulement."; }
+
+# R49 : GitHub supprime la branche d'une PR dès qu'elle est fusionnée (dev, staging et main restent : elles sont protégées)
+api -X PATCH "repos/$org/$depot" -F delete_branch_on_merge=true --jq '"= suppression des branches fusionnées : \(.delete_branch_on_merge)"'
 
 base=$(api "repos/$org/$depot" --jq .default_branch)
 sha=$(api "repos/$org/$depot/git/ref/heads/$base" --jq .object.sha)
