@@ -1,0 +1,120 @@
+# Workflow partagé : construit les images une seule fois, à la fusion dans dev (R44).
+# Seuls les services dont les sources ont changé sont reconstruits. Le manifeste (image et digest exacts de chaque
+# service) reçoit le tag dev. staging, la production et les versions reprennent ces mêmes images : voir promouvoir-images.yml.
+# Aucun tag « latest ». Images privées. Le projet décrit ses services dans .github/images/services.json.
+#
+# Les tests restent l'affaire du projet : il les appelle avant ce workflow.
+#
+# Exemple d'appel (push sur dev) :
+#   jobs:
+#     tests:
+#       uses: ./.github/workflows/tests.yml
+#     images:
+#       needs: tests
+#       permissions: { contents: read, packages: write }
+#       uses: abnd-corp/gouvernance/.github/workflows/images-dev.yml@<empreinte>
+#       with: { gouvernance: <la même empreinte> }
+name: Images de dev
+
+on:
+  workflow_call:
+    inputs:
+      gouvernance:
+        description: "Empreinte du commit de gouvernance, la même que dans « uses: » (c'est elle qui fournit scripts/images.sh)"
+        type: string
+        required: true
+      configuration:
+        description: "Chemin de la description des services, relatif au projet"
+        type: string
+        default: ".github/images/services.json"
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGES_CONF: ${{ inputs.configuration }}
+
+jobs:
+  plan:
+    name: Services à construire
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.plan.outputs.services }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: abnd-corp/gouvernance
+          ref: ${{ inputs.gouvernance }}
+          path: .gouvernance
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - id: plan
+        run: echo "services=$(.gouvernance/scripts/images.sh plan "$GITHUB_SHA")" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build ${{ matrix.service }}
+    needs: plan
+    if: needs.plan.outputs.services != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.services) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Architectures
+        id: conf
+        run: echo "plateformes=$(jq -r .plateformes "$IMAGES_CONF")" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ${{ matrix.contexte }}
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.cible }}
+          platforms: ${{ steps.conf.outputs.plateformes }}
+          build-args: ${{ matrix.build_args }}
+          push: true
+          tags: |
+            ${{ matrix.image }}:${{ matrix.empreinte }}
+            ${{ matrix.image }}:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+  manifeste:
+    name: Manifeste (dev)
+    needs: [plan, build]
+    if: always() && needs.plan.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: abnd-corp/gouvernance
+          ref: ${{ inputs.gouvernance }}
+          path: .gouvernance
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - uses: oras-project/setup-oras@ac735097e22fe643015b0d19645f7c9a69942128 # v2.0.4
+      - run: .gouvernance/scripts/images.sh manifeste "$GITHUB_SHA" "$RUNNER_TEMP/manifeste.json"
+      - run: .gouvernance/scripts/images.sh etiqueter "$RUNNER_TEMP/manifeste.json" dev
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: manifeste
+          path: ${{ runner.temp }}/manifeste.json
+          if-no-files-found: ignore

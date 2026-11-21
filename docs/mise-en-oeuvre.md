@@ -67,36 +67,88 @@ Ce dépôt (`gouvernance`) ne suit pas ce chemin : il ne contient que de la docu
 
 ## Les images de conteneurs (R44)
 
-Le workflow partagé `publier-image.yml` construit une image pour amd64 et arm64 et la pousse sur GHCR (`ghcr.io/abnd-corp/<nom>`). Tag : l'empreinte du commit, plus `X.Y.Z` et `X.Y` quand le commit porte un tag `vX.Y.Z`. Jamais `latest`. Il ne tourne **que lorsqu'une promotion arrive sur `main`**, c'est-à-dire au merge `staging` → `main` : une image par mise en production, pas une par commit ni par tag. Un projet l'appelle ainsi :
+Une image est construite **une fois**, à la fusion dans `dev`, puis promue sans reconstruction jusqu'à la production. Trois workflows partagés le font (build, promotion, nettoyage), et un script (`scripts/images.sh`) porte la logique. Le modèle de projet (`template`) les appelle déjà : sans `.github/images/services.json`, ils ne font rien, donc un projet sans conteneur peut les garder. Le modèle vient de traintracks ; la décision est dans l'[ADR 0002](adr/0002-images-promues-sans-reconstruction.md).
+
+**1. Décrire les services** dans `.github/images/services.json` du projet :
+
+```json
+{
+  "projet": "mon-projet",
+  "plateformes": "linux/amd64,linux/arm64",
+  "services": {
+    "api": {
+      "image": "mon-projet-api",
+      "contexte": ".",
+      "dockerfile": "api/Dockerfile",
+      "sources": ["api", "shared", ".dockerignore"],
+      "build_args": ["APP_VERSION={court}", "APP_COMMIT={commit}"]
+    }
+  }
+}
+```
+
+`sources` liste ce qui entre dans l'image : leur empreinte git donne le tag `c-<empreinte>` du service. Si cette image existe déjà, le service n'est pas reconstruit. `{commit}` et `{court}` sont remplacés dans `build_args`.
+
+**2. Appeler les workflows.** `<empreinte>` est le même commit de `gouvernance` dans `uses:` et dans `with:` : c'est lui qui fournit `scripts/images.sh`.
 
 ```yaml
+# .github/workflows/images.yml : fusion dans dev
 name: Images
 on:
   push:
-    branches: [main]
-permissions:
-  contents: read
-  packages: write
+    branches: [dev]
 jobs:
-  api:
-    uses: abnd-corp/gouvernance/.github/workflows/publier-image.yml@<empreinte>
-    with: { nom: mon-projet-api, contexte: ./api, cible: prod }
-  web:
-    uses: abnd-corp/gouvernance/.github/workflows/publier-image.yml@<empreinte>
-    with: { nom: mon-projet-web, contexte: ./web, cible: prod }
+  tests:
+    uses: ./.github/workflows/tests.yml
+  images:
+    needs: tests
+    permissions: { contents: read, packages: write }
+    uses: abnd-corp/gouvernance/.github/workflows/images-dev.yml@<empreinte>
+    with: { gouvernance: <empreinte> }
 ```
 
-Les images sont **privées**. Le premier envoi crée le paquet ; il faut vérifier une fois, dans les réglages du paquet, qu'il est bien privé et lié au dépôt. Un serveur qui tire l'image a besoin d'un jeton de lecture (`read:packages`) : à prévoir au moment du déploiement. Le paramètre `publier: false` construit sans publier, pour un essai.
+```yaml
+# .github/workflows/promotion.yml : staging, production, version
+name: Promotion
+on:
+  push:
+    branches: [staging, main]
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+jobs:
+  promotion:
+    permissions: { contents: write, packages: write }
+    uses: abnd-corp/gouvernance/.github/workflows/promouvoir-images.yml@<empreinte>
+    with: { gouvernance: <empreinte> }
+```
+
+**3. Ce qui se passe à chaque marche**
+
+| Événement | Effet sur les images |
+|---|---|
+| Fusion dans `dev` | Build des services changés, tag `dev`, manifeste publié |
+| Fusion dans `staging` | Tag `staging` sur les images de `dev` |
+| Fusion dans `main` | Tag `prod` |
+| Tag `vX.Y.Z` sur `main` | Tag `vX.Y.Z` et release GitHub avec le manifeste |
+
+Le **manifeste** liste, pour un commit, l'image et le digest exacts de chaque service. Il est publié sur GHCR (`<projet>-manifeste`) et joint à la release : c'est la trace de ce qui tourne (R32). Il n'y a pas de date dedans : pour un même commit, il est identique d'une étape à l'autre.
+
+**Poser une version** : `scripts/poser-version.sh X.Y.Z` pose le tag `vX.Y.Z` sur `main` (donc sur ce qui est en production) et le pousse ; la CI fait le reste. Un projet l'expose en `make release V=X.Y.Z`. Le workflow refuse un tag qui n'est pas sur `main`.
+
+Les images sont **privées**. Le premier envoi crée le paquet ; il faut vérifier une fois, dans les réglages du paquet, qu'il est bien privé et lié au dépôt. Un serveur qui tire l'image a besoin d'un jeton de lecture (`read:packages`) : à prévoir au moment du déploiement.
 
 ### Ne pas accumuler d'images
 
-Une image par mise en production, c'est aussi une image de plus à chaque promotion : trois promotions par jour sur deux images, c'est six versions par jour pour un projet. Le plan gratuit limite le stockage des paquets privés (environ 500 Mo, à vérifier dans les réglages de facturation de l'organisation). Trois leviers :
+On construit à chaque fusion dans `dev`, donc les images s'accumulent plus vite qu'avec un build à la promotion. Le plan gratuit limite le stockage des paquets privés (environ 500 Mo, à vérifier dans les réglages de facturation de l'organisation). Trois leviers :
 
-1. **Promouvoir moins souvent.** Une image n'est construite qu'à la promotion sur `main` : regrouper plusieurs fonctionnalités dans une promotion réduit les images sans rien perdre.
-2. **Nettoyer automatiquement.** `nettoyer-images.yml` garde les N plus récentes (5 par défaut) et supprime le reste après 4 semaines. Il tourne chaque semaine depuis le projet. Premier lancement en essai (`essai: true`), qui liste sans supprimer.
+1. **Ne reconstruire que ce qui change.** L'empreinte par service fait qu'un service inchangé réutilise son image.
+2. **Nettoyer automatiquement.** Le workflow partagé `nettoyer-images-non-promues.yml` (exemple d'appel en tête du fichier, chaque lundi) lance `scripts/images.sh nettoyer <jours> <essai>`, qui supprime les images qui ne portent ni `dev`, `staging`, `prod` ni une version, au-delà de `<jours>` jours, et protège les couches des images multi-architecture. Premier lancement en essai (`essai=true`), qui liste sans supprimer. Il garde les versions `vX.Y.Z`, ce que `nettoyer-images.yml` ne sait pas faire.
 3. **Des couches partagées.** Un Dockerfile qui sépare installation des dépendances et code fait que deux images successives ne stockent presque que la différence.
 
-Limite connue : avec le jeton du workflow, on ne peut pas exclure les tags de version du nettoyage ; un jeton dédié le permettra plus tard.
+> **Ne pas combiner avec `nettoyer-images.yml`** : il garde les N plus récentes sans connaître les tags d'étape, et peut supprimer l'image de `prod` si elle est ancienne. Dans ce modèle, on nettoie avec `nettoyer-images-non-promues.yml`. Pour qu'il puisse supprimer, le dépôt doit avoir le rôle **Admin** sur chaque paquet (réglages du paquet, « Manage Actions access ») ; sans lui, il ne fait que lister.
+
+### L'ancien modèle : `publier-image.yml`
+
+`publier-image.yml` construit à la promotion sur `main`, une image par mise en production. Il reste en place pour les projets qui l'utilisent déjà (rien ne casse), mais n'est plus la référence : un nouveau projet prend `images-dev.yml` et `promouvoir-images.yml`.
 
 ## Les échéances (R46)
 

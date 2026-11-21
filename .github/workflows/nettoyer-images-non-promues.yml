@@ -1,0 +1,67 @@
+# Workflow partagé : supprime les images qui n'ont jamais été promues (R44, ADR 0002).
+# Une image qui ne porte ni dev, staging, prod ni une version vX.Y.Z, et qui n'a pas bougé depuis <jours> jours, est supprimée.
+# Les couches des images multi-architecture encore utilisées sont protégées (scripts/images.sh nettoyer).
+# À utiliser avec images-dev.yml et promouvoir-images.yml, jamais avec nettoyer-images.yml (qui ignore les tags d'étape).
+#
+# Exemple d'appel (chaque lundi, essai à la main) :
+#   on:
+#     schedule:
+#       - cron: "17 4 * * 1"
+#     workflow_dispatch:
+#       inputs:
+#         essai: { description: "Essai : lister sans supprimer", type: boolean, default: true }
+#   jobs:
+#     nettoyage:
+#       permissions: { contents: read, packages: write }
+#       uses: abnd-corp/gouvernance/.github/workflows/nettoyer-images-non-promues.yml@<empreinte>
+#       with:
+#         gouvernance: <la même empreinte>
+#         essai: ${{ github.event_name == 'workflow_dispatch' && inputs.essai || false }}
+name: Nettoyer les images non promues
+
+on:
+  workflow_call:
+    inputs:
+      gouvernance:
+        description: "Empreinte du commit de gouvernance, la même que dans « uses: » (c'est elle qui fournit scripts/images.sh)"
+        type: string
+        required: true
+      configuration:
+        description: "Chemin de la description des services, relatif au projet"
+        type: string
+        default: ".github/images/services.json"
+      jours:
+        description: "Âge minimal (jours) d'une image non promue avant suppression"
+        type: number
+        default: 14
+      essai:
+        description: "Lister sans supprimer"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGES_CONF: ${{ inputs.configuration }}
+
+jobs:
+  nettoyer:
+    name: Nettoyage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: abnd-corp/gouvernance
+          ref: ${{ inputs.gouvernance }}
+          path: .gouvernance
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: .gouvernance/scripts/images.sh nettoyer "${{ inputs.jours }}" "${{ inputs.essai }}"
